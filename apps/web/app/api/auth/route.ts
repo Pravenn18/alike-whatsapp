@@ -1,14 +1,13 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import Twilio from 'twilio';
 
 const client = Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-export default async function sendOtp(req: NextApiRequest, res: NextApiResponse) {
-  const { phone, otp } = req.body;
-  console.log("phone", JSON.stringify(phone));
-  
+export async function POST(req: NextRequest) {
+  const { phone, otp } = await req.json();
+
   if (!phone || !otp) {
-    return res.status(400).json({ message: 'Phone number and OTP are required.' });
+    return NextResponse.json({ message: 'Phone number and OTP are required.' }, { status: 400 });
   }
 
   try {
@@ -17,8 +16,8 @@ export default async function sendOtp(req: NextApiRequest, res: NextApiResponse)
       from: process.env.TWILIO_PHONE_NUMBER,
       to: phone,
     });
-    res.status(200).json({ message: 'OTP sent successfully', sid: message.sid });
+    return NextResponse.json({ message: 'OTP sent successfully', sid: message.sid }, { status: 200 });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to send OTP', error });
+    return NextResponse.json({ message: 'Failed to send OTP', error }, { status: 500 });
   }
 }
