@@ -5,6 +5,7 @@ const client = Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TO
 
 export default async function sendOtp(req: NextApiRequest, res: NextApiResponse) {
   const { phone, otp } = req.body;
+  console.log("phone", JSON.stringify(phone));
   
   if (!phone || !otp) {
     return res.status(400).json({ message: 'Phone number and OTP are required.' });
