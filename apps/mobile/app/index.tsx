@@ -29,7 +29,7 @@ import { initiatePhoneAuth } from '@/utils/auth';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Button } from 'react-native';
 
 const SignUpScreen: React.FC = () => {
   const [phone, setPhoneInput] = useState<string>('');
@@ -56,11 +56,15 @@ const SignUpScreen: React.FC = () => {
         router.push({ pathname: './(auth)/enter-otp', params: { phone } })
       }
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", error);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleNext = () => {
+    router.push("./(tabs)")
+  }
 
   return (
     <View style={styles.container}>
@@ -92,6 +96,7 @@ const SignUpScreen: React.FC = () => {
           {loading ? "Sending OTP..." : "Send OTP"}
         </Text>
       </TouchableOpacity>
+      <Button title="route" onPress={handleNext}/>
     </View>
   );
 };
