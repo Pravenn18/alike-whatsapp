@@ -6,19 +6,28 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const USERCHATS = [
   {
     name: "Praveen",
-    message: "Kya kar rah hai?"
+    message: "Dev",
+    phone: "7424938034"
+  },
+  {
+    name: "Shubham",
+    message: "Kya kar rah hai?",
+    phone: "8861076748"
   },
   {
     name: "Pratham",
-    message: "Hello"
+    message: "Hello",
+    phone: "7259857219"
   },
   {
     name: "Raj",
-    message: "Hello"
+    message: "Hello",
+    phone: "7870034353"
   },
   {
     name: "Roashan",
-    message: "Hello"
+    message: "Hello",
+    phone: "7425879610"
   },
   ]
 
@@ -28,7 +37,7 @@ export default function TabTwoScreen() {
       <ChatsTopBar />
       {USERCHATS.map((items) => 
       <View className='w-full pt-1'>
-        <ChatsList name={items.name} message={items.message} />
+        <ChatsList name={items.name} message={items.message} phone={items.phone} />
       </View>
     )}
     </SafeAreaView>
