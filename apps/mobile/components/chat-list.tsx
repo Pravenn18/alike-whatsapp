@@ -4,15 +4,18 @@ import { View, Text, Image, Pressable } from 'react-native';
 type ChatsListProps = {
     name: string;
     message: string;
+    phone: string;
 }
 
 const icons = {
     user: require('@/assets/images/user.png'),
 };
-const ChatsList = ({name, message}: ChatsListProps) => {
+const ChatsList = ({name, message, phone}: ChatsListProps) => {
     const handlePress = () => {
-        console.log("Pressed")
-        router.push("/send-message")
+        router.push({
+            pathname: "/send-message",
+            params: { contactPhone: phone }, // Pass contactPhone as a parameter
+          });
     }
   return (
     <Pressable className='bg-gray-500 w-full' onPress={handlePress}>
