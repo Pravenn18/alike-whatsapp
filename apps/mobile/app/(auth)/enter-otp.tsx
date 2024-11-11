@@ -1,23 +1,24 @@
 // screens/OtpScreen.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { verifyOtp } from '@/utils/auth';
 import { router } from 'expo-router';
+import { otpAtom } from '@/atom/otpAtom';
+import { useAtom } from 'jotai';
 
 const OtpScreen: React.FC = () => {
   const [otp, setOtp] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [storedOtp] = useAtom(otpAtom);
   const route = useRoute();
-  const { phone } = route.params as { phone: string };
+  const { phone, otp: generatedOtp } = route.params as { phone: string; otp: string };
   
-
   const handleVerifyOtp = async () => {
     if (!otp) {
       Alert.alert("Please enter the OTP");
       return;
     }
-
     setLoading(true);
 
     try {
@@ -37,7 +38,9 @@ const OtpScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Enter OTP</Text>
-
+      {storedOtp && 
+      <Text>Your otp is {storedOtp}</Text>
+      }
       <TextInput
         style={styles.input}
         placeholder="Enter OTP"

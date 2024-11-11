@@ -1,8 +1,9 @@
 import { supabase } from "./supabase";
 
-export const initiatePhoneAuth = async (phone: string, name: string) => {
+export const initiatePhoneAuth = async (phone: string, name: string, setOtp: (otp: string) => void) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
-  console.log("otp", JSON.stringify(otp));
+  setOtp(otp)
+  // console.log("otp", JSON.stringify(otp));
   // Save the OTP to the database
 //   const { data, error } = await supabase
 //     .from('users')

@@ -11,3 +11,5 @@ export const sendMessage = async (sender: string, receiver: string, content: str
   
   return data;
 };
+// npm install --global eas-cli && eas init --id 4e1fe2f9-b8fc-4d3d-88ac-3281f702e4bd
+// AC6E18ATLNR5LG7GJ2SVPQKR

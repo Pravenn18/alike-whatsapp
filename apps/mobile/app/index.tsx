@@ -24,10 +24,11 @@
 //     gap: 8,
 //   },
 // });
+import { otpAtom } from '@/atom/otpAtom';
 import { nameAtom, phoneAtom } from '@/atom/userAtom';
 import { initiatePhoneAuth } from '@/utils/auth';
 import { router } from 'expo-router';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Button } from 'react-native';
 
@@ -37,6 +38,7 @@ const SignUpScreen: React.FC = () => {
   const [name, setNameInput] = useState<string>('');
   const [, setPhone] = useAtom(phoneAtom);
   const [, setName] = useAtom(nameAtom);
+  const setOtp = useSetAtom(otpAtom);
 
   const handleSignUp = async () => {
     if (!phone) {
@@ -46,7 +48,7 @@ const SignUpScreen: React.FC = () => {
     setLoading(true);
 
     try {
-      const { error } = await initiatePhoneAuth(phone, name);
+      const { error } = await initiatePhoneAuth(phone, name, setOtp);
       if (error) {
         Alert.alert("Error sending OTP", error.message);
       } else {
