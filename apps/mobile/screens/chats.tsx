@@ -37,32 +37,38 @@ const USERCHATS = [
   ]
 
   export default function TabTwoScreen() {
-  const phone = useAtom(phoneAtom);
-  useEffect(() => {
-    const setupPushNotifications = async () => {
-      const expoPushToken = await registerForPushNotificationsAsync();
-      console.log('Expo Push Token:', JSON.stringify(expoPushToken));
-      if (expoPushToken) {
-
-        // Send the token to your backend for later use
-        await axios.post('http://localhost:3000/api/notifications/register', {
-          expoPushToken,
-          phone
-        });
-      }
-    };
-
-    setupPushNotifications();
-  }, []);
-  useEffect(() => {
-    const setupPushNotifications = async () => {
-      const token = await registerForPushNotificationsAsync();
-      console.log('Expo Push Token: chat', token);
-      // Send the token to your backend for later use
-    };
-
-    setupPushNotifications();
-  }, []);
+  const [phone] = useAtom(phoneAtom);
+        useEffect(() => {
+      const setupPushNotifications = async () => {
+        const expoPushToken = await registerForPushNotificationsAsync();
+        console.log('Phone:', JSON.stringify(typeof(phone)));
+        console.log('Expo Push Token:', JSON.stringify(typeof(expoPushToken)));
+        if (expoPushToken) {
+          console.log("entered push fcm");
+          try {
+            console.log("entered push fcm2");
+            const response = await axios.post(`${process.env.BASE_URL}/api/notifications/register`, {
+              expoPushToken,
+              phone,
+            });
+            console.log('Server response:', JSON.stringify(response.data));
+          } catch (error) {
+            if (axios.isAxiosError(error)) {
+              console.error('Axios error:', error.message);
+              if (error.response) {
+                console.error('Error response data:', JSON.stringify(error.response.data));
+              } else {
+                console.error('No response received:', error.request);
+              }
+            } else {
+              console.error('Unexpected error:', error);
+            }
+          }
+        }
+      };
+    
+      setupPushNotifications();
+    }, []);
   return (
     <SafeAreaView className='flex items-center bg-gray-900 h-full'>
       <ChatsTopBar />

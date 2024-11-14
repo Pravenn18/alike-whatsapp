@@ -1,30 +1,44 @@
 import { supabase } from '@/utils/supabase';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(req: NextApiRequest, res: NextApiResponse) {
+export const POST = async (req: NextRequest) => {
   try {
-    const { expoPushToken, phone } = await req.body;
+    const { expoPushToken, phone } = await req.json();
     console.log("entered");
     console.log("expoToken", JSON.stringify(expoPushToken));
     console.log("phone", JSON.stringify(phone));
 
     if (!phone || !expoPushToken) {
-      return res.status(400).json({ error: 'Phone number and FCM token are required' });
+      return NextResponse.json({ error: 'Phone number and FCM token are required' }, { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } });
     }
 
     // Store or update the expoPushToken in your database for the current user
     const { error } = await supabase
       .from('users')
-      .upsert({ fcm: expoPushToken, phone }, { onConflict: 'phone' });
+      .update({ fcm: expoPushToken })
+      .eq('phone', phone)
+      .single();
 
     if (error) {
       console.error("Supabase error:", error);
-      return res.status(500).json({ error: error.message });
+      return NextResponse.json({ error: error.message }, { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
     }
 
-    res.status(200).json({ success: true });
+    return NextResponse.json({ success: true }, { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } });
   } catch (error) {
     console.error("Server error:", error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
   }
+}
+
+// Handle OPTIONS method for CORS preflight requests
+export const OPTIONS = async () => {
+  return NextResponse.json({}, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }
