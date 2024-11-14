@@ -47,7 +47,7 @@ const USERCHATS = [
           console.log("entered push fcm");
           try {
             console.log("entered push fcm2");
-            const response = await axios.post(`${process.env.BASE_URL}/api/notifications/register`, {
+            const response = await axios.post(`https://alike-whatsapp.vercel.app/api/notifications/register`, {
               expoPushToken,
               phone,
             });
