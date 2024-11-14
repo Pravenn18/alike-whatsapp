@@ -1,5 +1,10 @@
+import { phoneAtom } from '@/atom/userAtom';
 import ChatsList from '@/components/chat-list';
 import ChatsTopBar from '@/components/chats-top-bar';
+import { registerForPushNotificationsAsync } from '@/services/notifications';
+import axios from 'axios';
+import { useAtom } from 'jotai';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -31,7 +36,33 @@ const USERCHATS = [
   },
   ]
 
-export default function TabTwoScreen() {
+  export default function TabTwoScreen() {
+  const phone = useAtom(phoneAtom);
+  useEffect(() => {
+    const setupPushNotifications = async () => {
+      const expoPushToken = await registerForPushNotificationsAsync();
+      console.log('Expo Push Token:', JSON.stringify(expoPushToken));
+      if (expoPushToken) {
+
+        // Send the token to your backend for later use
+        await axios.post('http://localhost:3000/api/notifications/register', {
+          expoPushToken,
+          phone
+        });
+      }
+    };
+
+    setupPushNotifications();
+  }, []);
+  useEffect(() => {
+    const setupPushNotifications = async () => {
+      const token = await registerForPushNotificationsAsync();
+      console.log('Expo Push Token: chat', token);
+      // Send the token to your backend for later use
+    };
+
+    setupPushNotifications();
+  }, []);
   return (
     <SafeAreaView className='flex items-center bg-gray-900 h-full'>
       <ChatsTopBar />

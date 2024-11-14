@@ -1,17 +1,24 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Slot, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { ClerkLoaded, ClerkProvider } from '@clerk/clerk-expo';
+import { registerForPushNotificationsAsync } from '@/services/notifications';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  //   useEffect(() => {
+  //   const setupPushNotifications = async () => {
+  //     const token = await registerForPushNotificationsAsync();
+  //     console.log('Expo Push Token: layout', token);
+  //     // Send the token to your backend for later use
+  //   };
+
+  //   setupPushNotifications();
+  // }, []);
+
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
 
   if (!publishableKey) {
@@ -20,7 +27,6 @@ export default function RootLayout() {
     )
   }
 
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
