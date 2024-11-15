@@ -1,12 +1,12 @@
 import { supabase } from '@/utils/supabase';
 import axios from 'axios';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 
-export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
-  const { userId, title, body } = req.body;
+export const POST = async (req: NextRequest) => {
+  const { userId, title, body } = await req.json();
 
   if (!userId) {
-    return res.status(400).json({ error: 'User ID is required' });
+    return NextResponse.json({ error: 'User ID is required' });
   }
 
   // Fetch the Expo push token from your database
@@ -17,11 +17,11 @@ export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
     .single();
 
   if (error || !userToken?.expoPushToken) {
-    return res.status(404).json({ error: 'Expo push token not found for the user' });
+    return NextResponse.json({ error: 'Expo push token not found for the user' });
   }
 
   try {
-    const response = await axios.post(
+    await axios.post(
       'https://exp.host/--/api/v2/push/send',
       {
         to: userToken.expoPushToken,
@@ -36,10 +36,10 @@ export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     );
 
-    console.log("Notification sent:", response.data);
-    res.status(200).json({ success: true, data: response.data });
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error sending notification:", error.response?.data || error.message);
-    res.status(500).json({ error: error.response?.data || error.message });
+    console.error("Server error:", error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+
   }
 }
