@@ -18,7 +18,7 @@ const ChatsList = ({name, message, phone}: ChatsListProps) => {
           });
     }
   return (
-    <Pressable className='bg-gray-500 w-full' onPress={handlePress}>
+    <Pressable className='bg-gray-500 w-full mb-1 rounded-md' onPress={handlePress}>
         <View className='flex-row w-full'>
             <View className='self-center px-6'>
                 <Image source={icons.user} className='w-10 h-10'/>
