@@ -2,6 +2,7 @@ import * as Contacts from 'expo-contacts';
 import { useAtom } from "jotai";
 import contactsAtom from "../../data";
 import { Contact } from "../../data/atom/contactAtom";
+import { fetchUsers } from '@/utils/fetchUsers';
 
 export const useManageContacts = () => {
   const [contacts, setContacts] = useAtom(contactsAtom);
@@ -23,9 +24,11 @@ export const useManageContacts = () => {
     return [];
   };
 
-  const addContact = (contact: Contact) => {
-    setContacts((prevContacts) => [...prevContacts, contact]);
+  const fetchContact = async (senderId: string) => {
+    const users = await fetchUsers(senderId);
+    console.log("users", JSON.stringify(users));
+    setContacts(users);
   };
 
-  return { contacts, fetchContacts, addContact };
+  return { contacts, fetchContacts, fetchContact };
 };
