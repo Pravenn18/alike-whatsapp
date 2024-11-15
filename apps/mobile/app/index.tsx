@@ -24,8 +24,8 @@
 //     gap: 8,
 //   },
 // });
-import { otpAtom } from '@/atom/otpAtom';
-import { nameAtom, phoneAtom } from '@/atom/userAtom';
+import { otpAtom } from '@/data/atom/otpAtom';
+import { nameAtom, phoneAtom } from '@/data/atom/userAtom';
 import { initiatePhoneAuth } from '@/utils/auth';
 import { router } from 'expo-router';
 import { useAtom, useSetAtom } from 'jotai';

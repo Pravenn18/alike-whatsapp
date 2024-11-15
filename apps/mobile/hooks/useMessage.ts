@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSetAtom } from 'jotai';
 import { supabase } from '@/utils/supabase';
-import { messagesAtom } from '@/atom/messageAtom';
+import { messagesAtom } from '@/data/atom/messageAtom';
 import { Message } from '@/types/Message';
 
 export const useMessages = (userPhone: string, contactPhone: string) => {

@@ -1,4 +1,4 @@
-import { phoneAtom } from '@/atom/userAtom';
+import { phoneAtom } from '@/data/atom/userAtom';
 import ChatsList from '@/components/chat-list';
 import ChatsTopBar from '@/components/chats-top-bar';
 import { registerForPushNotificationsAsync } from '@/services/notifications';
@@ -38,7 +38,7 @@ const USERCHATS = [
 
   export default function TabTwoScreen() {
   const [phone] = useAtom(phoneAtom);
-        useEffect(() => {
+      useEffect(() => {
       const setupPushNotifications = async () => {
         const expoPushToken = await registerForPushNotificationsAsync();
         console.log('Phone:', JSON.stringify(typeof(phone)));

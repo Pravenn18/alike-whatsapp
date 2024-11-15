@@ -1,4 +1,4 @@
-import { nameAtom } from '@/atom/userAtom';
+import { nameAtom } from '@/data/atom/userAtom';
 import { useAtom } from 'jotai';
 import { View, Text } from 'react-native';
 

@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'reac
 import { useRoute } from '@react-navigation/native';
 import { verifyOtp } from '@/utils/auth';
 import { router } from 'expo-router';
-import { otpAtom } from '@/atom/otpAtom';
+import { otpAtom } from '@/data/atom/otpAtom';
 import { useAtom } from 'jotai';
 
 const OtpScreen: React.FC = () => {
