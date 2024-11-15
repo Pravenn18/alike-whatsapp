@@ -41,7 +41,7 @@ export default function HomeScreen() {
 
     const addContactToDb = async (formatPhoneNumber: string, recieverName: string) => {
         try {
-          const response = await axios.post(`http://192.168.0.104:3001/api/user/add-user-from-contact`, {
+          const response = await axios.post(`https://alike-whatsapp.vercel.app/api/user/add-user-from-contact`, {
             reciever_id: formatPhoneNumber,
             sender_id: phone,
             reciever_name: recieverName,
