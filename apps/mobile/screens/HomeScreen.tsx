@@ -81,10 +81,11 @@ export default function HomeScreen() {
       />
       <Modal visible={isModalVisible} animationType="slide">
         <FlatList
+          className="w-full p-4 bg-gray-500"
           data={contactList}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handleAddContact({ ...item || '' })}>
-              <Text>{item.name} - {item.phone}</Text>
+              <Text className="bg-red-200 p-1 mb-1 h-10">{item.name} - {item.phone}</Text>
             </TouchableOpacity>
           )}
         />
