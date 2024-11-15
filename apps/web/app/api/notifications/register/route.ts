@@ -1,7 +1,7 @@
 import { supabase } from '@/utils/supabase';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST (req: NextRequest) {
+export const POST = async (req: NextRequest) => {
   try {
     const { expoPushToken, phone } = await req.json();
     console.log("entered");

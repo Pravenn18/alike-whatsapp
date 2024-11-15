@@ -2,7 +2,7 @@ import { supabase } from '@/utils/supabase';
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
   const { userId, title, body } = req.body;
 
   if (!userId) {
