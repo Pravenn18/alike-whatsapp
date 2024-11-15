@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Modal, FlatList, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { useAtom } from "jotai";
@@ -7,20 +7,16 @@ import useManageContacts from "@/behaviours";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ChatsTopBar from "@/components/chats-top-bar";
 import ChatsList from "@/components/chat-list";
+import { Contact } from "@/data/atom/contactAtom";
+import axios from "axios";
+import { phoneAtom } from "@/data/atom/userAtom";
 
 export default function HomeScreen() {
-  const [contacts] = useAtom(contactsAtom);
-  const { fetchContacts, addContact } = useManageContacts();
-  const [contactList, setContactList] = useState([]);
+  const [contacts, setContacts] = useAtom(contactsAtom);
+  const { fetchContacts, fetchContact } = useManageContacts();
+  const [contactList, setContactList] = useState<{ id: string | undefined; name: string; phone: string; }[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
-
-//   useEffect(() => {
-//     const setupPushNotifications = async () => {
-//       const expoPushToken = await registerForPushNotificationsAsync();
-//       console.log("Expo Push Token:", JSON.stringify(expoPushToken));
-//     };
-//     setupPushNotifications();
-//   }, []);
+  const [phone] = useAtom(phoneAtom);
 
   const handleOpenContacts = async () => {
     const fetchedContacts = await fetchContacts();
@@ -28,18 +24,57 @@ export default function HomeScreen() {
     setModalVisible(true);
   };
 
-  const handleAddContact = (contact) => {
-    addContact(contact);
+  useEffect(() => {
+    fetchContact && fetchContact(phone);
+  }, [phone]);
+
+  const formatPhoneNumber = (phoneNumber: string): string => {
+    const cleanedNumber = phoneNumber.replace(/\D/g, '');
+    return cleanedNumber.slice(-10);
+  };
+
+  const handleAddContact = (contact: Contact) => {
+    const formattedPhone = formatPhoneNumber(contact.phone);
+    addContactToDb(formattedPhone, contact.name);
     setModalVisible(false);
   };
 
+    const addContactToDb = async (formatPhoneNumber: string, recieverName: string) => {
+        try {
+          const response = await axios.post(`http://192.168.0.104:3001/api/user/add-user-from-contact`, {
+            reciever_id: formatPhoneNumber,
+            sender_id: phone,
+            reciever_name: recieverName,
+          });
+            setContacts((prevContacts) => {
+            if (!prevContacts.some(contact => contact.phone === formatPhoneNumber)) {
+              return [
+              ...prevContacts,
+              { name: recieverName, phone: formatPhoneNumber },
+              ];
+            }
+            return prevContacts;
+            });
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error('Axios error:', error.message);
+            if (error.response) {
+              console.error('Error response data:', JSON.stringify(error.response.data));
+            } else {
+              console.error('No response received:', error.request);
+            }
+          } else {
+            console.error('Unexpected error:', error);
+          }
+        }
+      }  
   return (
     <SafeAreaView className="flex items-center bg-gray-900 h-full">
       <ChatsTopBar />
       <Button title="Add Contact" onPress={handleOpenContacts} />
       <FlatList
+        className= "w-full p-2"
         data={contacts}
-        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ChatsList name={item.name} message="" phone={item.phone} />
         )}
@@ -47,9 +82,8 @@ export default function HomeScreen() {
       <Modal visible={isModalVisible} animationType="slide">
         <FlatList
           data={contactList}
-          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleAddContact(item)}>
+            <TouchableOpacity onPress={() => handleAddContact({ ...item || '' })}>
               <Text>{item.name} - {item.phone}</Text>
             </TouchableOpacity>
           )}
