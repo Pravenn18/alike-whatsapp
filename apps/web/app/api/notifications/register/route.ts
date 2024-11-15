@@ -32,7 +32,7 @@ export async function POST (req: NextRequest) {
 }
 
 // Handle OPTIONS method for CORS preflight requests
-export const OPTIONS = async () => {
+export async function OPTIONS () {
   return NextResponse.json({}, {
     status: 204,
     headers: {
