@@ -38,10 +38,6 @@ const SignUpScreen: React.FC = () => {
     }
   };
 
-  const handleNext = () => {
-    router.push("./(tabs)")
-  }
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Sign Up with Phone</Text>
@@ -72,7 +68,6 @@ const SignUpScreen: React.FC = () => {
           {loading ? "Sending OTP..." : "Send OTP"}
         </Text>
       </TouchableOpacity>
-      <Button title="route" onPress={handleNext}/>
     </View>
   );
 };
