@@ -6,6 +6,8 @@ import { verifyOtp } from '@/utils/auth';
 import { router } from 'expo-router';
 import { otpAtom } from '@/data/atom/otpAtom';
 import { useAtom } from 'jotai';
+import { registerForPushNotificationsAsync } from '@/services/notificationsService';
+import { addExpoTokenToDb } from '@/services/apiService';
 
 const OtpScreen: React.FC = () => {
   const [otp, setOtp] = useState<string>('');
@@ -29,12 +31,25 @@ const OtpScreen: React.FC = () => {
         // Navigate to home screen or any other screen after verification
       }
     } catch (error) {
-      Alert.alert("Invalid OTP", error.message);
+      if (error instanceof Error) {
+        Alert.alert("Invalid OTP", error.message);
+      } else {
+        Alert.alert("Invalid OTP", "An unknown error occurred.");
+      }
     } finally {
       setLoading(false);
     }
   };
-
+  useEffect(() => {
+    const setupPushNotifications = async () => {
+      const expoPushToken = await registerForPushNotificationsAsync();
+      if (expoPushToken) {
+        await addExpoTokenToDb(expoPushToken, phone);
+      }
+    };
+    setupPushNotifications();
+  }, []);
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Enter OTP</Text>
