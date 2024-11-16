@@ -1,7 +1,7 @@
 import { phoneAtom } from '@/data/atom/userAtom';
 import ChatsList from '@/components/chat-list';
 import ChatsTopBar from '@/components/chats-top-bar';
-import { registerForPushNotificationsAsync } from '@/services/notifications';
+import { registerForPushNotificationsAsync } from '@/services/notificationsService';
 import axios from 'axios';
 import { useAtom } from 'jotai';
 import { useEffect } from 'react';

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, FlatList, Text, ActivityIndicator } from 'react-native';
 import { useAtom } from 'jotai';
-import { sendMessage } from '../utils/messageService';
-import { useMessages } from '@/hooks/useMessage';
+import { sendMessage, useMessages } from '../services/messageService';
 import { messagesAtom } from '@/data/atom/messageAtom';
 import { phoneAtom } from '@/data/atom/userAtom';
 import { useRoute } from '@react-navigation/native';
@@ -24,7 +23,6 @@ const ChatScreen = () => {
       setMessage('');
     }
   };
-console.log("chatMessage", JSON.stringify(messages));
 if (!messages) {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

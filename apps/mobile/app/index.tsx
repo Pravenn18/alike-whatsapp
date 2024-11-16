@@ -1,29 +1,3 @@
-// import { router } from 'expo-router';
-// import { Button, StyleSheet, View } from 'react-native';
-
-// export default function TabTwoScreen() {
-//   const handleNext = () => {
-//     router.push("/(home)");
-//   }
-//   return (
-//     <View style={{backgroundColor: "red", height: "100%"}}>
-//       <Button title='Next' onPress={handleNext}></Button>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   headerImage: {
-//     color: '#808080',
-//     bottom: -90,
-//     left: -35,
-//     position: 'absolute',
-//   },
-//   titleContainer: {
-//     flexDirection: 'row',
-//     gap: 8,
-//   },
-// });
 import { otpAtom } from '@/data/atom/otpAtom';
 import { nameAtom, phoneAtom } from '@/data/atom/userAtom';
 import { initiatePhoneAuth } from '@/utils/auth';
@@ -48,9 +22,9 @@ const SignUpScreen: React.FC = () => {
     setLoading(true);
 
     try {
-      const { error } = await initiatePhoneAuth(phone, name, setOtp);
-      if (error) {
-        Alert.alert("Error sending OTP", error.message);
+      const response = await initiatePhoneAuth(phone, name, setOtp);
+      if (response?.error) {
+        Alert.alert("Error sending OTP", response.error.message);
       } else {
         Alert.alert("OTP sent!", "Please check your SMS messages for the verification code.");
         setPhone(phone);
@@ -58,7 +32,7 @@ const SignUpScreen: React.FC = () => {
         router.push({ pathname: './(auth)/enter-otp', params: { phone } })
       }
     } catch (error) {
-      Alert.alert("Error", error);
+      Alert.alert("Error", String(error));
     } finally {
       setLoading(false);
     }

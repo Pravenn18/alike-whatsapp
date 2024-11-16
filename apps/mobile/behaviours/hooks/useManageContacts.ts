@@ -1,7 +1,6 @@
 import * as Contacts from 'expo-contacts';
 import { useAtom } from "jotai";
 import contactsAtom from "../../data";
-import { Contact } from "../../data/atom/contactAtom";
 import { fetchUsers } from '@/utils/fetchUsers';
 
 export const useManageContacts = () => {
@@ -26,7 +25,6 @@ export const useManageContacts = () => {
 
   const fetchContact = async (senderId: string) => {
     const users = await fetchUsers(senderId);
-    console.log("users", JSON.stringify(users));
     setContacts(users);
   };
 

@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { ClerkLoaded, ClerkProvider } from '@clerk/clerk-expo';
-import { registerForPushNotificationsAsync } from '@/services/notifications';
+import { registerForPushNotificationsAsync } from '@/services/notificationsService';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

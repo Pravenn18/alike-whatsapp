@@ -8,8 +8,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ChatsTopBar from "@/components/chats-top-bar";
 import ChatsList from "@/components/chat-list";
 import { Contact } from "@/data/atom/contactAtom";
-import axios from "axios";
 import { phoneAtom } from "@/data/atom/userAtom";
+import { addContactToDb, sendNotification } from "@/services/apiService";
 
 export default function HomeScreen() {
   const [contacts, setContacts] = useAtom(contactsAtom);
@@ -17,6 +17,8 @@ export default function HomeScreen() {
   const [contactList, setContactList] = useState<{ id: string | undefined; name: string; phone: string; }[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [phone] = useAtom(phoneAtom);
+
+  console.log('phone:', JSON.stringify(phone));
 
   const handleOpenContacts = async () => {
     const fetchedContacts = await fetchContacts();
@@ -33,41 +35,16 @@ export default function HomeScreen() {
     return cleanedNumber.slice(-10);
   };
 
-  const handleAddContact = (contact: Contact) => {
+  const handleAddContact = async (contact: Contact) => {
     const formattedPhone = formatPhoneNumber(contact.phone);
-    addContactToDb(formattedPhone, contact.name);
+    const contactData = await addContactToDb(formattedPhone, contact.name, phone);
+    console.log('Contact added:', JSON.stringify(contactData));
     setModalVisible(false);
   };
-
-    const addContactToDb = async (formatPhoneNumber: string, recieverName: string) => {
-        try {
-          const response = await axios.post(`https://alike-whatsapp.vercel.app/api/user/add-user-from-contact`, {
-            reciever_id: formatPhoneNumber,
-            sender_id: phone,
-            reciever_name: recieverName,
-          });
-            setContacts((prevContacts) => {
-            if (!prevContacts.some(contact => contact.phone === formatPhoneNumber)) {
-              return [
-              ...prevContacts,
-              { name: recieverName, phone: formatPhoneNumber },
-              ];
-            }
-            return prevContacts;
-            });
-        } catch (error) {
-          if (axios.isAxiosError(error)) {
-            console.error('Axios error:', error.message);
-            if (error.response) {
-              console.error('Error response data:', JSON.stringify(error.response.data));
-            } else {
-              console.error('No response received:', error.request);
-            }
-          } else {
-            console.error('Unexpected error:', error);
-          }
-        }
-      }  
+    const handleSendNotification = async () => {
+      const response = await sendNotification(phone, 'Test Notification', 'This is a test notification');
+      console.log('Notification sent:', JSON.stringify(response));
+    }
   return (
     <SafeAreaView className="flex items-center bg-gray-900 h-full">
       <ChatsTopBar />
@@ -79,6 +56,7 @@ export default function HomeScreen() {
           <ChatsList name={item.name} message="" phone={item.phone} />
         )}
       />
+      <Button title="send notification" onPress={handleSendNotification} />
       <Modal visible={isModalVisible} animationType="slide">
         <FlatList
           className="w-full p-4 bg-gray-500"
