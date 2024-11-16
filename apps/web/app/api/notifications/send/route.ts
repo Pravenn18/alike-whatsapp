@@ -11,12 +11,14 @@ export const POST = async (req: NextRequest) => {
 
   // Fetch the Expo push token from your database
   const { data: userToken, error } = await supabase
-    .from('user_tokens')
-    .select('expoPushToken')
-    .eq('userId', userId)
+    .from('users')
+    .select('fcm')
+    .eq('phone', userId)
     .single();
 
-  if (error || !userToken?.expoPushToken) {
+    console.log("User token:", JSON.stringify(userToken?.fcm));
+
+  if (error || !userToken?.fcm) {
     return NextResponse.json({ error: 'Expo push token not found for the user' });
   }
 
@@ -24,10 +26,10 @@ export const POST = async (req: NextRequest) => {
     await axios.post(
       'https://exp.host/--/api/v2/push/send',
       {
-        to: userToken.expoPushToken,
+        to: userToken.fcm,
         title,
         body,
-        sound: 'default',
+        // sound: 'default',
       },
       {
         headers: {
