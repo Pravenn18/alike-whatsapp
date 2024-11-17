@@ -22,7 +22,7 @@ export const sendNotification = async (userId: string, title: string, body: stri
     console.error('Error sending notification:', error);
     throw error;
   }
-};
+}
 
 export const addContactToDb = async (formatPhoneNumber: string, recieverName: string, phone: string) => {
   try {
@@ -33,7 +33,7 @@ export const addContactToDb = async (formatPhoneNumber: string, recieverName: st
     });
     return response.data;
   } catch (error) {
-    console.error('Error sending notification:', error);
+    console.error('Error adding contact:', error);
     throw error;
   }
 };
@@ -47,7 +47,7 @@ export const addExpoTokenToDb = async (expoPushToken: string, phone: string) => 
     });
     return response.data;
   } catch (error) {
-    console.error('Error sending notification:', error);
+    console.error('Error adding expo token:', error);
     throw error;
   }
 };
