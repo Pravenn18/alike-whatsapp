@@ -1,35 +1,46 @@
 import { router } from 'expo-router';
-import { View, Text, Image, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 
 type ChatsListProps = {
-    name: string;
-    message: string;
-    phone: string;
-}
+  name: string;
+  message: string | null;
+  phone: string;
+};
 
 const icons = {
-    user: require('@/assets/images/user.png'),
+  user: require('@/assets/images/user.png'),
 };
-const ChatsList = ({name, message, phone}: ChatsListProps) => {
-    const handlePress = () => {
-        router.push({
-            pathname: "/send-message",
-            params: { contactPhone: phone }, // Pass contactPhone as a parameter
-          });
-    }
+
+const ChatsList = ({ name, message, phone }: ChatsListProps) => {
+  const handlePress = () => {
+    router.push({
+      pathname: '/send-message',
+      params: { contactPhone: phone }, // Pass contactPhone as a parameter
+    });
+  };
+
+  const generateInitials = (name: string) => {
+    const initials = name.split(' ').map((word) => word[0]).join('');
+    return initials.toUpperCase();
+  };
+
+  const initials = generateInitials(name);
+
   return (
-    <Pressable className='bg-gray-500 w-full mb-1 rounded-md' onPress={handlePress}>
-        <View className='flex-row w-full'>
-            <View className='self-center px-6'>
-                <Image source={icons.user} className='w-10 h-10'/>
-            </View>
-            <View>
-                <Text className='text-lg font-semibold text-white'>{name}</Text>
-                <Text className='text-sm font-light text-gray-200'>{message}</Text>
-            </View>
+    <TouchableOpacity className='bg-transparent w-[90%] mb-1 rounded-md' onPress={handlePress}>
+      <View className='flex-row w-full pl-2'>
+        <View className='self-center pr-6'>
+          <View className='w-12 h-12 rounded-full bg-green-900 justify-center items-center'>
+            <Text className='text-white text-sm font-extrabold'>{initials}</Text>
+          </View>
         </View>
-    </Pressable>
+        <View>
+          <Text className='text-lg font-medium text-white'>{name}</Text>
+          <Text className='text-sm font-light text-gray-200'>{message}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
-}
+};
 
 export default ChatsList;

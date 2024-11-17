@@ -7,7 +7,7 @@ const ChatsTopBar = () => {
 return (
     <View className='flex w-full'>
         <View className='flex-row justify-between '>
-            <Text className='text-3xl p-4 font-medium text-white'>Whatsapp</Text>
+            <Text className='text-2xl p-4 font-bold text-white'>Whatsapp</Text>
             <Text className='text-lg p-4 font-normal text-white'>Hello, {name}</Text>
         </View>
     </View>
