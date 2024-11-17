@@ -1,3 +1,3 @@
-import HomeScreen from "./chats";
+import HomeScreen from "./HomeScreen";
 
 export default { HomeScreen }

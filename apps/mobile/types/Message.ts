@@ -1,7 +1,8 @@
 export interface Message {
-    sender: string;
-    receiver: string;
-    message: string;
-    created_at: string;
-  }
-  
+  id: string;
+  sender_id: string;
+  reciever_id: string;
+  message: string;
+  status: 'sent' | 'delivered' | 'seen';
+  created_at: string;
+}
