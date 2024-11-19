@@ -1,40 +1,52 @@
+// TODO
+
 import { supabase } from '@/utils/supabase';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST (req: NextRequest) {
-  try {
-    const { reciever_id, sender_id, reciever_name  } = await req.json();
-    if (!reciever_id || !sender_id) {
-      return NextResponse.json({ error: 'reciever_id and sender_id are required' }, { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } });
-    }
-    const { data } = await supabase
-    .from('messages')
-    .select('id')
-    .eq('reciever_id', reciever_id)
-    .eq('sender_id', sender_id)
+export const POST  = async(req: NextRequest) => {
+  if (req.method === 'POST') {
+    try {
+      const { receiver_id, sender_id } = await req.json();
+      if (!receiver_id || !sender_id) {
+        return NextResponse.json({ error: 'reciever_id and sender_id are required' });
+      }
 
-    // Store or update the expoPushToken in your database for the current user
-    if(data && data.length === 0) {
-    await supabase
-      .from('messages')
-      .insert({ 'reciever_id': reciever_id, 'sender_id': sender_id, 'reciever_name': reciever_name });
-    }
+      // Check if a chat already exists between the participants
+      const { data: chatData, error: chatError } = await supabase
+        .from('chats')
+        .select('id')
+        .contains('participants', [receiver_id, sender_id])
+        .single();
 
-    return NextResponse.json({ success: true }, { status: 200, headers: { 'Access-Control-Allow-Origin': '*' } });
-  } catch (error) {
-    console.error("Server error:", error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
+      if (chatError && chatError.code !== 'PGRST116') { // PGRST116 is the code for no rows found
+        console.error('Error fetching chat:', chatError);
+        return NextResponse.json({ error: 'Internal Server Error' });
+      }
+
+      let chatId;
+      if (chatData) {
+        // Chat already exists
+        chatId = chatData.id;
+      } else {
+        // Create a new chat
+        const { data: newChat, error: createError } = await supabase
+          .from('chats')
+          .insert([{ participants: [receiver_id, sender_id], is_group: false }])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating chat:', createError);
+          return NextResponse.json({ error: 'Internal Server Error' });
+        }
+
+        chatId = newChat.id;
+      }
+
+      return NextResponse.json({ success: true, chatId });
+    } catch (error) {
+      console.error('Server error:', error);
+      return NextResponse.json({ error: 'Internal Server Error' });
+    }
   }
-}
-
-// Handle OPTIONS method for CORS preflight requests
-export async function OPTIONS () {
-  return NextResponse.json({}, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
 }
