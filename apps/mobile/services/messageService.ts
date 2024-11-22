@@ -1,16 +1,22 @@
-import { supabase } from "../utils/supabase";
-import { useEffect } from 'react';
-import { useSetAtom } from 'jotai';
-import { latestMessageAtom, messagesAtom } from '@/data/atom/messageAtom';
+import { supabase } from '../utils/supabase';
 import { Message } from '@/types/Message';
+import { useSetAtom } from 'jotai';
+import { messagesAtom, latestMessageAtom } from '@/data/atom/messageAtom';
+import { useEffect } from 'react';
+import { getOrCreateChat } from './chatService';
+import { getUserByPhone } from './userService';
 
-export const sendMessage = async (sender: string, receiver: string, content: string) => {
+export const sendMessage = async (senderId: string, chatId: string, content: string, type: 'text' | 'image') => {
+  // Get or create chat ID
+  const sender_id = await getUserByPhone(senderId);
+
   const { data, error } = await supabase
     .from('messages')
     .insert([{ 
-      sender_id: sender, 
-      reciever_id: receiver, 
-      message: content, 
+      chat_id: chatId,
+      sender_id: sender_id?.id, 
+      content, 
+      type,
       status: "sent" 
     }])
     .select()
@@ -38,7 +44,7 @@ export const updateMessageStatus = async (messageId: string, status: 'delivered'
   return data;
 };
 
-export const useMessages = (userPhone: string, contactPhone: string) => {
+export const useMessages = (chatId: string) => {
   const setMessages = useSetAtom(messagesAtom);
   const setLatestMessage = useSetAtom(latestMessageAtom);
 
@@ -47,19 +53,18 @@ export const useMessages = (userPhone: string, contactPhone: string) => {
       const { data, error } = await supabase
         .from('messages')
         .select('*')
-        .or(`and(reciever_id.eq.${userPhone},sender_id.eq.${contactPhone}),and(reciever_id.eq.${contactPhone},sender_id.eq.${userPhone})`)
+        .eq('chat_id', chatId)
         .order('created_at', { ascending: true });
       
       if (error) {
         console.error('Error fetching messages:', error);
       } else {
-        const nonNullMessages = (data as Message[]).filter(msg => msg.message);
+        const nonNullMessages = (data as Message[]).filter(msg => msg !== null);
         setMessages(nonNullMessages);
         
         // Mark received messages as delivered
-        const undeliveredMessages = (data as Message[])
+        const undeliveredMessages = nonNullMessages
           .filter(msg => 
-            msg.reciever_id === userPhone && 
             msg.status === 'sent'
           );
 
@@ -81,11 +86,11 @@ export const useMessages = (userPhone: string, contactPhone: string) => {
           const newMessage = payload.new as Message;
           
           if (payload.eventType === 'INSERT') {
-            setMessages((messages) => [...messages, newMessage]);
+            setMessages((messages) => [...messages, newMessage].filter(msg => msg !== null));
             setLatestMessage(newMessage);
             console.log('New message:', JSON.stringify(newMessage));
             // If we're the receiver, mark as delivered
-            if (newMessage.reciever_id === contactPhone) {
+            if (newMessage.status === 'sent') {
               console.log('Marking as delivered');
               updateMessageStatus(newMessage.id, 'delivered');
             }
@@ -93,7 +98,7 @@ export const useMessages = (userPhone: string, contactPhone: string) => {
             setMessages((messages) => 
               messages.map(msg => 
                 msg.id === newMessage.id ? newMessage : msg
-              )
+              ).filter(msg => msg !== null)
             );
           }
         }
@@ -103,5 +108,5 @@ export const useMessages = (userPhone: string, contactPhone: string) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userPhone, contactPhone, setMessages]);
+  }, [chatId, setMessages, setLatestMessage]);
 };

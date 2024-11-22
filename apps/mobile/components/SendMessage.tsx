@@ -7,6 +7,7 @@ import { nameAtom, phoneAtom } from '@/data/atom/userAtom';
 import { useRoute } from '@react-navigation/native';
 import { Message } from '@/types/Message';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from '@/utils/supabase';
 
 const backgroundImage = require('@/assets/images/whatsappbg.png'); // Replace with your image path
 
@@ -30,92 +31,140 @@ const MessageStatus = ({ status, time }: { status: Message['status'], time: Mess
 
   return (
     <View className='flex-row'>
-    <Text style={{ color: '#8696A0', marginLeft: 5 }} className='text-xs pt-2'>
-      {new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-    </Text>
-    <Text style={{ color: getStatusColor(), marginLeft: 5 }} className='text-xs pt-2'>
-      {getStatusIcon()}
-    </Text>
+      <Text style={{ color: '#8696A0', marginLeft: 5 }} className='text-xs pt-2'>
+        {new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      </Text>
+      <Text style={{ color: getStatusColor(), marginLeft: 5 }} className='text-xs pt-2'>
+        {getStatusIcon()}
+      </Text>
     </View>
   );
 };
-
 
 const ChatScreen = () => {
   const [phone] = useAtom(phoneAtom);
   const userPhone = phone;
   const route = useRoute();
-  const { contactPhone } = route.params as { contactPhone: string };
+  const { chatId, contactPhone } = route.params as { chatId: string, contactPhone: string };
 
   const [message, setMessage] = useState('');
   const [messages] = useAtom(messagesAtom);
   const [latestMessage] = useAtom(latestMessageAtom);
+  const [lastSeen, setLastSeen] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState<boolean>(false);
+
+  console.log('chatID:', JSON.stringify(chatId));
+
   console.log('latestMessages:', JSON.stringify(latestMessage));
 
-  useMessages(userPhone, contactPhone);
+  useMessages(chatId);
 
   const handleSendMessage = async () => {
     if (message.trim()) {
-      await sendMessage(userPhone, contactPhone, message);
+      await sendMessage(phone, chatId, message, 'text');
       setMessage('');
     }
   };
 
-  
   useEffect(() => {
     const markMessagesAsSeen = async () => {
       const unseenMessages = messages.filter(
         msg => 
-          msg.reciever_id === userPhone && 
-        msg.status === 'delivered'
+          msg.status === 'delivered'
       );
       console.log('unseenMessages:', JSON.stringify(unseenMessages));
       for (const msg of unseenMessages) {
         await updateMessageStatus(msg.id, 'seen');
       }
     };
-    
+
     markMessagesAsSeen();
   }, [messages, userPhone]);
-  
-  //TODO: Implement notification
+
   // useEffect(() => {
-  //   const sendMessageNotification = async () => {
-  //     const latestMsg = messages[messages.length - 1];
-  //     console.log('latestMsg:', JSON.stringify(latestMsg));
-  //     if (latestMsg && latestMsg.reciever_id === contactPhone && latestMsg.status !== 'seen') {
-  //       await sendNotification(
-  //         contactPhone,
-  //         `Message Received from ${userName}`, 
-  //         latestMsg.message || 'Received a message'
-  //       );
+  //   const fetchUserStatus = async () => {
+  //     const { data, error } = await supabase
+  //       .from('users')
+  //       .select('online, last_seen')
+  //       .eq('phone', contactPhone)
+  //       .single();
+
+  //     if (error) {
+  //       console.error('Error fetching user status:', error);
+  //     } else {
+  //       setIsOnline(data.online);
+  //       setLastSeen(data.last_seen);
   //     }
   //   };
-  //   sendMessageNotification();
-  // }, [messages]);
 
-  if (!messages) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
+  //   fetchUserStatus();
+
+  //   const unsubscribe = subscribeToUserStatus(contactPhone, (online, lastSeen) => {
+  //     setIsOnline(online);
+  //     setLastSeen(lastSeen);
+  //   });
+
+  //   return () => {
+  //     unsubscribe();
+  //   };
+  // }, [contactPhone]);
+
+  // useEffect(() => {
+  //   const updateLastSeen = async () => {
+  //     await updateUserLastSeen(userPhone);
+  //   };
+
+  //   const updateOnlineStatus = async () => {
+  //     await updateUserOnlineStatus(userPhone, true);
+  //     window.addEventListener('beforeunload', async () => {
+  //       await updateUserOnlineStatus(userPhone, false);
+  //     });
+  //   };
+
+  //   updateLastSeen();
+  //   updateOnlineStatus();
+
+  //   return () => {
+  //     updateUserOnlineStatus(userPhone, false);
+  //   };
+  // }, [userPhone]);
+
+  // Filter out null messages
+  const filteredMessages = messages.filter(msg => msg !== null);
+
+  // if (!filteredMessages.length) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  //       <ActivityIndicator size="large" color="#0000ff" />
+  //     </View>
+  //   );
+  // }
 
   return (
-    <SafeAreaView className='flex-1'>
     <ImageBackground source={backgroundImage} style={{ flex: 1 }}>
-      <View className='flex-1 p-5'>
+      <SafeAreaView className='flex-1 p-5'>
+        <View className='flex-row justify-between items-center mb-4'>
+          <Text className='text-lg font-bold text-white'>{contactPhone}</Text>
+          {isOnline ? (
+            <Text className='text-sm text-green-500'>Online</Text>
+          ) : (
+            lastSeen && (
+              <Text className='text-sm text-gray-300'>
+                Last seen: {new Date(lastSeen).toLocaleString()}
+              </Text>
+            )
+          )}
+        </View>
         <FlatList
-          data={messages}
+          data={filteredMessages}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <View className={`p-[1px] ${item.sender_id === userPhone ? 'items-end' : 'items-start'}`}>
-              <View className={`flex-row p-1 px-2 rounded-lg ${
+            <View className={`p-3 ${item.sender_id === userPhone ? 'items-end' : 'items-start'}`}>
+              <View className={`flex-row p-2 rounded-lg ${
                 item.sender_id === userPhone ? 'bg-green-200' : 'bg-gray-200'
               }`}>
-                <Text className="text-base">{item.message}</Text>
+                <Text className="text-sm">{item.content}</Text>
                 {item.sender_id === userPhone && (
                   <MessageStatus status={item.status} time={item.created_at}/>
                 )}
@@ -137,9 +186,8 @@ const ChatScreen = () => {
             <Text className="text-white font-medium">Send</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     </ImageBackground>
-    </SafeAreaView>
   );
 };
 

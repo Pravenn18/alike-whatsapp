@@ -9,6 +9,7 @@ import ChatsList from '@/components/chat-list';
 import ChatsTopBar from '@/components/chats-top-bar';
 import contactsAtom from '@/data';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getUserByPhone } from '@/services/userService';
 
 const HomeScreen: React.FC = () => {
   const [contacts] = useAtom(contactsAtom);
@@ -31,7 +32,13 @@ const HomeScreen: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchContact && fetchContact(phone);
+    const getUserId = async () => {
+      const user = await getUserByPhone(phone);
+      if (user) {
+        fetchContact && fetchContact(user.id);
+      }
+    }
+    getUserId();
   }, [phone]);
 
   useEffect(() => {
@@ -50,7 +57,9 @@ const HomeScreen: React.FC = () => {
 
   const handleAddContact = async (contact: { id: string | undefined; name: string; phone: string; }) => {
     const formattedPhone = formatPhoneNumber(contact.phone);
-    const contactData = await addContactToDb(formattedPhone, contact.name, phone);
+    const user = await getUserByPhone(phone);
+    const addedContact = await getUserByPhone(formattedPhone);
+    const contactData = await addContactToDb(addedContact?.id ?? '', user?.id ?? '');
     setContacts((prevContacts) => {
       const contactExists = prevContacts.some(
       (c) => c.phone === formattedPhone
@@ -78,7 +87,7 @@ const HomeScreen: React.FC = () => {
           <ChatsList
             name={item.name}
             phone={item.phone}
-            message={latestMessage ? latestMessage.message : ''}
+            message={latestMessage ? latestMessage.content : ''}
           />
         )}
       />

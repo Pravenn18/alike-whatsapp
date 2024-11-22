@@ -1,8 +1,9 @@
 export interface Message {
   id: string;
-  sender_id: string;
-  reciever_id: string;
-  message: string;
-  status: 'sent' | 'delivered' | 'seen';
+  chat_id: string;
   created_at: string;
+  content: string;
+  type: 'text' | 'image';
+  sender_id: string;
+  status: 'sent' | 'delivered' | 'seen';
 }
